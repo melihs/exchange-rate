@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Services\ExchangeRateService;
+use App\Services\Provider1Adapter;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class ExchangeInfoDataCommand extends Command
 {
@@ -13,7 +14,7 @@ class ExchangeInfoDataCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'app:exchange-data';
+    protected $signature = 'app:provider {provider}';
 
     /**
      * The console command description.
@@ -21,6 +22,7 @@ class ExchangeInfoDataCommand extends Command
      * @var string
      */
     protected $description = 'This command fetches exchange rates';
+
 
     /**
      * Create a new command instance.
@@ -40,13 +42,19 @@ class ExchangeInfoDataCommand extends Command
         try {
             $client = new Client();
 
-            $request = $client->get('http://www.mocky.io/v2/5a74519d2d0000430bfe0fa0');
+            $provider = $this->argument('provider');
+
+            $request = $client->get($provider);
 
             $response = $request->getBody();
+
             $exchangeData = json_decode($response->getContents(), true);
 
+            $exchangeRateService = new  ExchangeRateService($exchangeData);
 
-        }catch (\Exception $e) {
+            $exchangeRateService->saveExchange();
+
+        } catch (\Exception $e) {
             Log::error('fetch exchange data error: '.$e->getMessage());
         }
     }
