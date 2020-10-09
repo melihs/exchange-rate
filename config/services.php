@@ -29,5 +29,8 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
+    'providers' => [
+      'provider1' => 'http://www.mocky.io/v2/5a74519d2d0000430bfe0fa0',
+      'provider2' => 'http://www.mocky.io/v2/5a74524e2d0000430bfe0fa3',
+    ],
 ];

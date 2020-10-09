@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Services\ExchangeRateService;
-use App\Services\Provider1Adapter;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ExchangeInfoDataCommand extends Command
 {
@@ -42,18 +42,25 @@ class ExchangeInfoDataCommand extends Command
         try {
             $client = new Client();
 
-            $provider = $this->argument('provider');
+            $providerApi = $this->argument('provider');
 
-            $request = $client->get($provider);
+            $request = $client->get($providerApi);
 
             $response = $request->getBody();
 
             $exchangeData = json_decode($response->getContents(), true);
 
-            $exchangeRateService = new  ExchangeRateService($exchangeData);
+            $services = config('services.providers');
 
-            $exchangeRateService->saveExchange();
+            foreach ($services as $name => $api) {
+                if ($providerApi == $api) {
+                    $serviceName = 'App\Services\\'.Str::ucfirst($name);
 
+                    $service = new $serviceName();
+
+                    $service->saveExchange($exchangeData);
+                }
+            }
         } catch (\Exception $e) {
             Log::error('fetch exchange data error: '.$e->getMessage());
         }
