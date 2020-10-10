@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\DB;
 
 function replace_key(&$array, $currentKey, $newKey) {
 
-    if(array_key_exists($currentKey, $array)) {
+    if (array_key_exists($currentKey, $array)) {
         $array[$newKey] = $array[$currentKey];
 
         unset($array[$currentKey]);
@@ -15,26 +15,25 @@ function replace_key(&$array, $currentKey, $newKey) {
     return false;
 }
 
-function provider_save($data) {
-    $name = 'pv-'.uniqid();
+function provider_save($data, $providerName) {
 
     $symbols = [];
 
-    $saveData = array_map(function ($result) use ($name, &$symbols) {
-        $result['name'] = $name;
+    $saveData = array_map(function ($result) use ($providerName, &$symbols) {
+        $result['name'] = $providerName;
 
-        array_push($symbols,$result['symbol']);
+        array_push($symbols, $result['symbol']);
 
         return $result;
     }, $data);
 
-    $isDuplicate = Provider::whereIn('symbol',$symbols)->exists();
+    $isDuplicate = Provider::whereIn('name', [$providerName])->exists();
 
     if ($isDuplicate) {
-        echo "already registered\n";
+        exit("already registered\n");
     }
 
     DB::table('providers')->insert($saveData);
 
-    echo "success\n";
+    exit("success\n");
 }

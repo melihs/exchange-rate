@@ -6,20 +6,23 @@ namespace App\Services;
 
 class Provider2Adapter
 {
+    const SYMBOL = 'symbol';
+    const AMOUNT = 'amount';
+
     public function fixDataFormat($data)
     {
-        $resultData = [];
-        foreach ($data as $item) {
-            if (key($item) != 'symbol') {
-                replace_key($item, key($item),'symbol');
-            }
+        $currencyLimit = ['USDTRY', 'EURTRY', 'GBPTRY'];
 
-            if (key($item) != 'amount') {
-                replace_key($item, key($item),'amount');
-            }
-            array_push($resultData,$item);
+        foreach ($data as $key => $item) {
+
+            $firstKey = array_key_first($item);
+            $lastkey = array_key_last($item);
+
+            $data[$key][$firstKey] = $currencyLimit[$key];
+
+            replace_key($data[$key], $firstKey, self::SYMBOL);
+            replace_key($data[$key], $lastkey, self::AMOUNT);
         }
-
-        return $resultData;
+        return $data;
     }
 }
